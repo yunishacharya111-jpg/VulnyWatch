@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Results — VulnWatch</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; }
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 40px; background: #161b22; border-bottom: 1px solid #30363d;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 700; color: #58a6ff; text-decoration: none; }
+    .logo svg { width: 32px; height: 32px; }
+    .nav-right a { color: #58a6ff; text-decoration: none; font-size: 0.9rem; border: 1px solid #58a6ff; padding: 6px 14px; border-radius: 6px; }
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+    .result-header { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 28px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; }
+    .result-header h1 { font-size: 1.4rem; color: #58a6ff; margin-bottom: 6px; word-break: break-all; }
+    .result-header p { color: #8b949e; font-size: 0.88rem; }
+    .score-circle { text-align: center; background: #0d1117; border-radius: 50%; width: 90px; height: 90px; min-width: 90px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 3px solid #58a6ff; }
+    .score-circle .num { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
+    .score-circle .lbl { font-size: 0.7rem; color: #8b949e; }
+    .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; margin-top: 8px; }
+    .badge.SECURE { background: #1a3d2a; color: #3fb950; }
+    .badge.LOW { background: #1a3d2a; color: #3fb950; }
+    .badge.MEDIUM { background: #3d2e1a; color: #e3b341; }
+    .badge.HIGH { background: #3d1a1a; color: #f85149; }
+    .badge.CRITICAL { background: #3d1a1a; color: #f85149; }
+    .badge.Pending { background: #21262d; color: #8b949e; }
+    .badge.Error { background: #3d1a1a; color: #f85149; }
+    .pending-msg { text-align: center; padding: 60px; background: #161b22; border: 1px solid #30363d; border-radius: 12px; color: #8b949e; }
+    .pending-msg .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; background: #161b22; border-radius: 12px; overflow: hidden; border: 1px solid #30363d; }
+    th { background: #21262d; padding: 12px 16px; text-align: left; font-size: 0.85rem; color: #8b949e; border-bottom: 1px solid #30363d; }
+    td { padding: 12px 16px; font-size: 0.88rem; border-bottom: 1px solid #21262d; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .status-pass { color: #3fb950; font-weight: 600; }
+    .status-fail { color: #f85149; font-weight: 600; }
+    .status-warn { color: #e3b341; font-weight: 600; }
+    .status-skip { color: #8b949e; font-weight: 600; }
+    .sev-critical { color: #f85149; font-weight: 700; }
+    .sev-high { color: #f85149; }
+    .sev-medium { color: #e3b341; }
+    .sev-low { color: #58a6ff; }
+    .sev-info { color: #8b949e; }
+    .sev-pass { color: #3fb950; }
+    .fix { font-size: 0.82rem; color: #8b949e; margin-top: 4px; }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z" fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
+      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    VulnWatch
+  </a>
+  <div class="nav-right">
+    <a href="/dashboard">← Back to Dashboard</a>
+  </div>
+</nav>
+<div class="container">
+  <div class="result-header">
+    <div>
+      <h1>{{ scan.url }}</h1>
+      <p>Scanned on {{ scan.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</p>
+      <span class="badge {{ scan.risk_label }}">{{ scan.risk_label }}</span>
+    </div>
+    <div class="score-circle">
+      <div class="num">{{ scan.score }}</div>
+      <div class="lbl">/ 100</div>
+    </div>
+  </div>
+
+  {% if results %}
+    <table>
+      <thead>
+        <tr>
+          <th>Check</th>
+          <th>Status</th>
+          <th>Severity</th>
+          <th>OWASP</th>
+          <th>Detail &amp; Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr>
+          <td>{{ r.check_name }}</td>
+          <td class="status-{{ r.status | lower }}">{{ r.status }}</td>
+          <td class="sev-{{ r.severity | lower }}">{{ r.severity }}</td>
+          <td>{{ r.owasp }}</td>
+          <td>
+            {{ r.detail }}
+            {% if r.fix %}<div class="fix">💡 {{ r.fix }}</div>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="pending-msg">
+      <div class="icon">⏳</div>
+      <p>No results found for this scan.</p>
+    </div>
+  {% endif %}
+</div>
+</body>
+</html>
