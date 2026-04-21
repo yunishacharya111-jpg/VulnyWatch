@@ -5,7 +5,8 @@ from database import db, User, Scan, Result
 
 app = Flask(__name__)
 app.secret_key = 'vulnywatch-secret-key-2024'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vulnywatch.db'
+import os
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:////tmp/vulnywatch.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
