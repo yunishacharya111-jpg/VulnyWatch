@@ -106,7 +106,8 @@ def results(scan_id):
     scan_results = Result.query.filter_by(scan_id=scan_id).all()
     return render_template('results.html', scan=scan, results=scan_results)
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
