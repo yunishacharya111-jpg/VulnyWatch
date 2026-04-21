@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard — VulnWatch</title>
+  <title>Dashboard — VulnyWatch</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; }
@@ -11,61 +11,92 @@
       display: flex; justify-content: space-between; align-items: center;
       padding: 18px 40px; background: #161b22; border-bottom: 1px solid #30363d;
     }
-    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 700; color: #58a6ff; text-decoration: none; }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.4rem; font-weight: 700; color: #58a6ff; text-decoration: none;
+    }
     .logo svg { width: 32px; height: 32px; }
     .nav-right { display: flex; align-items: center; gap: 16px; }
     .nav-right span { color: #8b949e; font-size: 0.9rem; }
-    .nav-right a { color: #f85149; text-decoration: none; font-size: 0.9rem; border: 1px solid #f85149; padding: 6px 14px; border-radius: 6px; }
+    .nav-right a {
+      color: #f85149; text-decoration: none; font-size: 0.9rem;
+      border: 1px solid #f85149; padding: 6px 14px; border-radius: 6px;
+    }
     .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
     .page-header { margin-bottom: 30px; }
     .page-header h1 { font-size: 1.8rem; color: #e6edf3; }
-    .page-header p { color: #8b949e; font-size: 0.9rem; margin-top: 4px; }
-    .scan-box { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 28px; margin-bottom: 36px; }
+    .page-header p  { color: #8b949e; font-size: 0.9rem; margin-top: 4px; }
+    .scan-box {
+      background: #161b22; border: 1px solid #30363d;
+      border-radius: 12px; padding: 28px; margin-bottom: 36px;
+    }
     .scan-box h2 { font-size: 1.1rem; margin-bottom: 16px; color: #e6edf3; }
     .scan-form { display: flex; gap: 12px; }
-    .scan-form input { flex: 1; padding: 10px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 0.95rem; }
+    .scan-form input {
+      flex: 1; padding: 10px 14px; background: #0d1117;
+      border: 1px solid #30363d; border-radius: 6px;
+      color: #e6edf3; font-size: 0.95rem;
+    }
     .scan-form input:focus { outline: none; border-color: #58a6ff; }
-    .scan-form button { padding: 10px 24px; background: #238636; border: none; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.95rem; cursor: pointer; }
+    .scan-form button {
+      padding: 10px 24px; background: #238636; border: none;
+      border-radius: 6px; color: #fff; font-weight: 600;
+      font-size: 0.95rem; cursor: pointer; white-space: nowrap;
+    }
     .scan-form button:hover { background: #2ea043; }
     .section-title { font-size: 1.1rem; color: #8b949e; margin-bottom: 16px; }
-    .empty { text-align: center; padding: 60px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
+    .empty {
+      text-align: center; padding: 60px 20px;
+      background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+    }
     .empty .icon { font-size: 3rem; margin-bottom: 12px; }
     .empty p { color: #8b949e; font-size: 0.95rem; }
     .scan-list { display: flex; flex-direction: column; gap: 12px; }
-    .scan-item { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; transition: border-color 0.2s; }
+    .scan-item {
+      background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+      padding: 18px 22px; display: flex; justify-content: space-between;
+      align-items: center; text-decoration: none; color: inherit; transition: border-color 0.2s;
+    }
     .scan-item:hover { border-color: #58a6ff; }
-    .scan-url { font-size: 1rem; color: #e6edf3; margin-bottom: 4px; }
+    .scan-url  { font-size: 1rem; color: #e6edf3; margin-bottom: 4px; }
     .scan-date { font-size: 0.82rem; color: #8b949e; }
-    .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
-    .badge.SECURE { background: #1a3d2a; color: #3fb950; }
-    .badge.LOW { background: #1a3d2a; color: #3fb950; }
-    .badge.MEDIUM { background: #3d2e1a; color: #e3b341; }
-    .badge.HIGH { background: #3d1a1a; color: #f85149; }
+    .badge {
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+    }
+    .badge.SECURE   { background: #1a3d2a; color: #3fb950; }
+    .badge.LOW      { background: #1a3d2a; color: #3fb950; }
+    .badge.MEDIUM   { background: #3d2e1a; color: #e3b341; }
+    .badge.HIGH     { background: #3d1a1a; color: #f85149; }
     .badge.CRITICAL { background: #3d1a1a; color: #f85149; }
-    .badge.Pending { background: #21262d; color: #8b949e; }
-    .badge.Error { background: #3d1a1a; color: #f85149; }
+    .badge.Pending  { background: #21262d; color: #8b949e; }
     .score { font-size: 1.3rem; font-weight: 700; color: #58a6ff; margin-right: 14px; }
   </style>
 </head>
 <body>
+
 <nav>
   <a class="logo" href="/">
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z" fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
-      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z"
+            fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
+      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    VulnWatch
+    VulnyWatch
   </a>
   <div class="nav-right">
     <span>👤 {{ current_user.name }}</span>
     <a href="/logout">Logout</a>
   </div>
 </nav>
+
 <div class="container">
   <div class="page-header">
     <h1>Dashboard</h1>
     <p>Run a scan or view your past results</p>
   </div>
+
   <div class="scan-box">
     <h2>🔍 Scan a Website</h2>
     <form class="scan-form" method="POST" action="/scan">
@@ -73,7 +104,9 @@
       <button type="submit">Scan Now</button>
     </form>
   </div>
+
   <div class="section-title">Recent Scans ({{ scans|length }})</div>
+
   {% if scans %}
     <div class="scan-list">
       {% for scan in scans %}
@@ -96,51 +129,6 @@
     </div>
   {% endif %}
 </div>
-<div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(13,17,23,0.95); z-index:9999; flex-direction:column; justify-content:center; align-items:center;">
-  <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:24px;">
-    <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z" fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
-    <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-  <div style="color:#58a6ff; font-size:1.4rem; font-weight:700; margin-bottom:12px;">Scanning in progress...</div>
-  <div style="color:#8b949e; font-size:0.95rem; margin-bottom:32px;">Running OWASP Top 10 checks — this takes about 30 seconds</div>
-  <div style="width:300px; height:6px; background:#21262d; border-radius:10px; overflow:hidden;">
-    <div id="progress-bar" style="height:100%; width:0%; background:#238636; border-radius:10px; transition:width 0.5s ease;"></div>
-  </div>
-  <div id="progress-label" style="color:#8b949e; font-size:0.82rem; margin-top:12px;">Connecting...</div>
-</div>
 
-<script>
-document.querySelector('.scan-form').addEventListener('submit', function() {
-  const overlay = document.getElementById('loading-overlay');
-  overlay.style.display = 'flex';
-
-  const steps = [
-    [10, 'Checking SSL certificate...'],
-    [22, 'Testing security headers...'],
-    [35, 'Running SQL injection tests...'],
-    [48, 'Checking XSS vulnerabilities...'],
-    [60, 'Scanning sensitive paths...'],
-    [72, 'Checking cookie security...'],
-    [82, 'Running port scan...'],
-    [91, 'Checking robots.txt...'],
-    [97, 'Calculating security score...'],
-  ];
-
-  let i = 0;
-  const bar   = document.getElementById('progress-bar');
-  const label = document.getElementById('progress-label');
-
-  const interval = setInterval(function() {
-    if (i < steps.length) {
-      bar.style.width   = steps[i][0] + '%';
-      label.textContent = steps[i][1];
-      i++;
-    } else {
-      clearInterval(interval);
-    }
-  }, 3000);
-});
-</script>
-</body>
 </body>
 </html>

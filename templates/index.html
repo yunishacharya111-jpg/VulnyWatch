@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VulnWatch — Web Vulnerability Scanner</title>
+  <title>VulnyWatch — Web Vulnerability Scanner</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; }
@@ -16,71 +16,106 @@
       font-size: 1.4rem; font-weight: 700; color: #58a6ff; text-decoration: none;
     }
     .logo svg { width: 36px; height: 36px; }
-    .nav-links a { color: #e6edf3; text-decoration: none; margin-left: 20px; font-size: 0.95rem; }
-    .nav-links a.btn { background: #238636; padding: 8px 18px; border-radius: 6px; color: #fff; }
+    .nav-links a {
+      color: #e6edf3; text-decoration: none; margin-left: 20px; font-size: 0.95rem;
+    }
+    .nav-links a.btn {
+      background: #238636; padding: 8px 18px; border-radius: 6px; color: #fff;
+    }
     .hero { text-align: center; padding: 100px 20px 60px; }
     .hero h1 { font-size: 3rem; color: #58a6ff; margin-bottom: 16px; }
-    .hero p { font-size: 1.2rem; color: #8b949e; max-width: 600px; margin: 0 auto 40px; }
+    .hero p  { font-size: 1.2rem; color: #8b949e; max-width: 600px; margin: 0 auto 40px; }
     .hero-btns a {
       display: inline-block; padding: 14px 32px; border-radius: 8px;
       text-decoration: none; font-size: 1rem; font-weight: 600; margin: 0 8px;
     }
-    .btn-primary { background: #238636; color: #fff; }
+    .btn-primary   { background: #238636; color: #fff; }
     .btn-secondary { background: #21262d; color: #58a6ff; border: 1px solid #30363d; }
     .features {
-      display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; padding: 60px 40px;
+      display: flex; justify-content: center; gap: 24px;
+      flex-wrap: wrap; padding: 60px 40px;
     }
     .card {
       background: #161b22; border: 1px solid #30363d; border-radius: 10px;
       padding: 28px; width: 260px; text-align: center;
     }
     .card .icon { font-size: 2.2rem; margin-bottom: 12px; }
-    .card h3 { color: #58a6ff; margin-bottom: 8px; }
-    .card p { color: #8b949e; font-size: 0.9rem; line-height: 1.5; }
-    footer { text-align: center; padding: 40px 20px 30px; border-top: 1px solid #30363d; }
-    .footer-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
-    .footer-logo svg { width: 28px; height: 28px; }
+    .card h3   { color: #58a6ff; margin-bottom: 8px; }
+    .card p    { color: #8b949e; font-size: 0.9rem; line-height: 1.5; }
+    footer {
+      text-align: center; padding: 40px 20px 30px; border-top: 1px solid #30363d;
+    }
+    .footer-logo {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-bottom: 10px;
+    }
+    .footer-logo svg  { width: 28px; height: 28px; }
     .footer-logo span { font-size: 1.2rem; font-weight: 700; color: #58a6ff; }
     footer p { color: #8b949e; font-size: 0.82rem; }
   </style>
 </head>
 <body>
+
 <nav>
   <a class="logo" href="/">
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z" fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
-      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z"
+            fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
+      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    VulnWatch
+    VulnyWatch
   </a>
   <div class="nav-links">
     <a href="/login">Login</a>
     <a href="/register" class="btn">Get Started</a>
   </div>
 </nav>
+
 <div class="hero">
   <h1>Scan. Detect. Secure.</h1>
-  <p>VulnWatch scans any website for security vulnerabilities based on the OWASP Top 10 — in seconds.</p>
+  <p>VulnyWatch scans any website for security vulnerabilities based on the OWASP Top 10 — in seconds.</p>
   <div class="hero-btns">
     <a href="/register" class="btn-primary">Start Scanning Free</a>
-    <a href="/login" class="btn-secondary">Login</a>
+    <a href="/login"    class="btn-secondary">Login</a>
   </div>
 </div>
+
 <div class="features">
-  <div class="card"><div class="icon">🔍</div><h3>OWASP Top 10</h3><p>Full coverage of all OWASP Top 10 vulnerability categories automatically checked.</p></div>
-  <div class="card"><div class="icon">📊</div><h3>Security Score</h3><p>Every site gets a 0–100 security score with a clear risk label.</p></div>
-  <div class="card"><div class="icon">📁</div><h3>Scan History</h3><p>All your past scans saved to your account. Revisit any result at any time.</p></div>
-  <div class="card"><div class="icon">🔒</div><h3>Your Account</h3><p>Register for free. Your scans are private and only visible to you.</p></div>
+  <div class="card">
+    <div class="icon">🔍</div>
+    <h3>OWASP Top 10</h3>
+    <p>Full coverage of all OWASP Top 10 vulnerability categories automatically checked.</p>
+  </div>
+  <div class="card">
+    <div class="icon">📊</div>
+    <h3>Security Score</h3>
+    <p>Every site gets a 0–100 security score with a clear risk label you can share.</p>
+  </div>
+  <div class="card">
+    <div class="icon">📁</div>
+    <h3>Scan History</h3>
+    <p>All your past scans saved to your account. Revisit any result at any time.</p>
+  </div>
+  <div class="card">
+    <div class="icon">🔒</div>
+    <h3>Your Account</h3>
+    <p>Register for free. Your scans are private and only visible to you.</p>
+  </div>
 </div>
+
 <footer>
   <div class="footer-logo">
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z" fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
-      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z"
+            fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
+      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <span>VulnWatch</span>
+    <span>VulnyWatch</span>
   </div>
   <p>Web Vulnerability Scanner &copy; 2024 — All rights reserved</p>
 </footer>
+
 </body>
 </html>

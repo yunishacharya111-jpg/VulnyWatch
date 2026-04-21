@@ -3,48 +3,80 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login — VulnWatch</title>
+  <title>Login — VulnyWatch</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; display: flex; flex-direction: column; min-height: 100vh; }
-    nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 40px; background: #161b22; border-bottom: 1px solid #30363d; }
-    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 700; color: #58a6ff; text-decoration: none; }
+    body {
+      font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3;
+      display: flex; flex-direction: column; min-height: 100vh;
+    }
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 40px; background: #161b22; border-bottom: 1px solid #30363d;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.4rem; font-weight: 700; color: #58a6ff; text-decoration: none;
+    }
     .logo svg { width: 32px; height: 32px; }
-    .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
-    .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 40px; width: 100%; max-width: 420px; }
+    .container {
+      flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px;
+    }
+    .card {
+      background: #161b22; border: 1px solid #30363d;
+      border-radius: 12px; padding: 40px; width: 100%; max-width: 420px;
+    }
     .card h2 { font-size: 1.6rem; margin-bottom: 6px; color: #e6edf3; }
-    .card p { color: #8b949e; margin-bottom: 28px; font-size: 0.9rem; }
-    .flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 18px; font-size: 0.9rem; }
-    .flash.error { background: #3d1a1a; border: 1px solid #f85149; color: #f85149; }
+    .card p  { color: #8b949e; margin-bottom: 28px; font-size: 0.9rem; }
+    .flash {
+      padding: 10px 14px; border-radius: 6px; margin-bottom: 18px; font-size: 0.9rem;
+    }
+    .flash.error   { background: #3d1a1a; border: 1px solid #f85149; color: #f85149; }
     .flash.success { background: #1a3d2a; border: 1px solid #238636; color: #3fb950; }
     label { display: block; margin-bottom: 6px; font-size: 0.9rem; color: #8b949e; }
-    input { width: 100%; padding: 10px 14px; margin-bottom: 18px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 0.95rem; }
+    input {
+      width: 100%; padding: 10px 14px; margin-bottom: 18px;
+      background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+      color: #e6edf3; font-size: 0.95rem;
+    }
     input:focus { outline: none; border-color: #58a6ff; }
-    button { width: 100%; padding: 12px; background: #238636; border: none; border-radius: 6px; color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    button {
+      width: 100%; padding: 12px; background: #238636;
+      border: none; border-radius: 6px; color: #fff;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+    }
     button:hover { background: #2ea043; }
-    .footer-link { text-align: center; margin-top: 20px; font-size: 0.88rem; color: #8b949e; }
+    .footer-link {
+      text-align: center; margin-top: 20px; font-size: 0.88rem; color: #8b949e;
+    }
     .footer-link a { color: #58a6ff; text-decoration: none; }
   </style>
 </head>
 <body>
+
 <nav>
   <a class="logo" href="/">
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z" fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
-      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z"
+            fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
+      <path d="M22 32l7 7 13-13" stroke="#ffffff" stroke-width="3.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    VulnWatch
+    VulnyWatch
   </a>
 </nav>
+
 <div class="container">
   <div class="card">
     <h2>Welcome back</h2>
-    <p>Log in to your VulnWatch account</p>
+    <p>Log in to your VulnyWatch account</p>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
         <div class="flash {{ category }}">{{ message }}</div>
       {% endfor %}
     {% endwith %}
+
     <form method="POST" action="/login">
       <label>Email</label>
       <input type="email" name="email" placeholder="you@example.com" required/>
@@ -52,8 +84,12 @@
       <input type="password" name="password" placeholder="••••••••" required/>
       <button type="submit">Login</button>
     </form>
-    <div class="footer-link">Don't have an account? <a href="/register">Register here</a></div>
+
+    <div class="footer-link">
+      Don't have an account? <a href="/register">Register here</a>
+    </div>
   </div>
 </div>
+
 </body>
 </html>

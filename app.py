@@ -4,8 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import db, User, Scan, Result
 
 app = Flask(__name__)
-app.secret_key = 'vulnwatch-secret-key-2024'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vulnwatch.db'
+app.secret_key = 'vulnywatch-secret-key-2024'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vulnywatch.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
