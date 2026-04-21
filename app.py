@@ -2,7 +2,8 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_mail import Mail, Message
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from itsdangerous import URLSafeTimedSerializer
 from database import db, User, Scan, Result
 
@@ -11,15 +12,10 @@ app.secret_key = os.environ.get('SECRET_KEY', 'vulnywatch-secret-key-2024')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:////tmp/vulnywatch.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+SENDER_EMAIL = 'yunishacharya111@gmail.com'
 
 db.init_app(app)
-mail = Mail(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -36,6 +32,19 @@ def verify_token(token, expiration=3600):
     except:
         return None
     return email
+
+def send_email(to_email, subject, html_content):
+    message = Mail(
+        from_email=SENDER_EMAIL,
+        to_emails=to_email,
+        subject=subject,
+        html_content=html_content
+    )
+    try:
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        sg.send(message)
+    except Exception as e:
+        print(f"[EMAIL ERROR] {e}")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -62,20 +71,14 @@ def register():
         db.session.commit()
         token = generate_verification_token(email)
         verify_url = url_for('verify_email', token=token, _external=True)
-        msg = Message('Verify your VulnyWatch account', recipients=[email])
-        msg.html = f'''
+        send_email(email, 'Verify your VulnyWatch account', f'''
         <div style="font-family:sans-serif;max-width:500px;margin:auto;">
           <h2 style="color:#238636;">Welcome to VulnyWatch!</h2>
           <p>Click the button below to verify your email:</p>
           <a href="{verify_url}" style="background:#238636;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">Verify Email</a>
           <p style="color:#888;">This link expires in 1 hour.</p>
-        </div>'''
-        try:
-            mail.send(msg)
-            flash('Account created! Please check your email to verify your account.', 'success')
-        except Exception as e:
-            print(f"[EMAIL ERROR] {e}")
-            flash('Account created but verification email failed. Please contact support.', 'error')
+        </div>''')
+        flash('Account created! Please check your email to verify your account.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
 
@@ -164,6 +167,7 @@ def results(scan_id):
         return redirect(url_for('dashboard'))
     scan_results = Result.query.filter_by(scan_id=scan_id).all()
     return render_template('results.html', scan=scan, results=scan_results)
+
 @app.route('/resend-verification', methods=['GET', 'POST'])
 def resend_verification():
     if request.method == 'POST':
@@ -172,18 +176,13 @@ def resend_verification():
         if user and not user.email_verified:
             token = generate_verification_token(email)
             verify_url = url_for('verify_email', token=token, _external=True)
-            msg = Message('Verify your VulnyWatch account', recipients=[email])
-            msg.html = f'''
+            send_email(email, 'Verify your VulnyWatch account', f'''
             <div style="font-family:sans-serif;max-width:500px;margin:auto;">
               <h2 style="color:#238636;">Verify your VulnyWatch account</h2>
               <p>Click the button below to verify your email:</p>
               <a href="{verify_url}" style="background:#238636;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">Verify Email</a>
               <p style="color:#888;">This link expires in 1 hour.</p>
-            </div>'''
-            try:
-                mail.send(msg)
-            except Exception as e:
-                print(f"[EMAIL ERROR] {e}")
+            </div>''')
         flash('If that email exists and is unverified, we sent a new link.', 'success')
         return redirect(url_for('login'))
     return render_template('resend_verification.html')
@@ -196,18 +195,13 @@ def forgot_password():
         if user:
             token = generate_verification_token(email)
             reset_url = url_for('reset_password', token=token, _external=True)
-            msg = Message('Reset your VulnyWatch password', recipients=[email])
-            msg.html = f'''
+            send_email(email, 'Reset your VulnyWatch password', f'''
             <div style="font-family:sans-serif;max-width:500px;margin:auto;">
               <h2 style="color:#238636;">Reset your password</h2>
               <p>Click the button below to reset your password:</p>
               <a href="{reset_url}" style="background:#238636;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">Reset Password</a>
               <p style="color:#888;">This link expires in 1 hour.</p>
-            </div>'''
-            try:
-                mail.send(msg)
-            except Exception as e:
-                print(f"[EMAIL ERROR] {e}")
+            </div>''')
         flash('If that email exists, we sent a password reset link.', 'success')
         return redirect(url_for('login'))
     return render_template('forgot_password.html')
@@ -227,6 +221,7 @@ def reset_password(token):
             flash('Password reset successfully! Please log in.', 'success')
             return redirect(url_for('login'))
     return render_template('reset_password.html')
+
 with app.app_context():
     db.create_all()
 
