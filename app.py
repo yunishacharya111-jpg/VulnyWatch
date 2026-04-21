@@ -164,7 +164,69 @@ def results(scan_id):
         return redirect(url_for('dashboard'))
     scan_results = Result.query.filter_by(scan_id=scan_id).all()
     return render_template('results.html', scan=scan, results=scan_results)
+@app.route('/resend-verification', methods=['GET', 'POST'])
+def resend_verification():
+    if request.method == 'POST':
+        email = request.form['email']
+        user = User.query.filter_by(email=email).first()
+        if user and not user.email_verified:
+            token = generate_verification_token(email)
+            verify_url = url_for('verify_email', token=token, _external=True)
+            msg = Message('Verify your VulnyWatch account', recipients=[email])
+            msg.html = f'''
+            <div style="font-family:sans-serif;max-width:500px;margin:auto;">
+              <h2 style="color:#238636;">Verify your VulnyWatch account</h2>
+              <p>Click the button below to verify your email:</p>
+              <a href="{verify_url}" style="background:#238636;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">Verify Email</a>
+              <p style="color:#888;">This link expires in 1 hour.</p>
+            </div>'''
+            try:
+                mail.send(msg)
+            except Exception as e:
+                print(f"[EMAIL ERROR] {e}")
+        flash('If that email exists and is unverified, we sent a new link.', 'success')
+        return redirect(url_for('login'))
+    return render_template('resend_verification.html')
 
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        user = User.query.filter_by(email=email).first()
+        if user:
+            token = generate_verification_token(email)
+            reset_url = url_for('reset_password', token=token, _external=True)
+            msg = Message('Reset your VulnyWatch password', recipients=[email])
+            msg.html = f'''
+            <div style="font-family:sans-serif;max-width:500px;margin:auto;">
+              <h2 style="color:#238636;">Reset your password</h2>
+              <p>Click the button below to reset your password:</p>
+              <a href="{reset_url}" style="background:#238636;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">Reset Password</a>
+              <p style="color:#888;">This link expires in 1 hour.</p>
+            </div>'''
+            try:
+                mail.send(msg)
+            except Exception as e:
+                print(f"[EMAIL ERROR] {e}")
+        flash('If that email exists, we sent a password reset link.', 'success')
+        return redirect(url_for('login'))
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    email = verify_token(token)
+    if email is None:
+        flash('The reset link is invalid or has expired.', 'error')
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.password = generate_password_hash(password)
+            db.session.commit()
+            flash('Password reset successfully! Please log in.', 'success')
+            return redirect(url_for('login'))
+    return render_template('reset_password.html')
 with app.app_context():
     db.create_all()
 

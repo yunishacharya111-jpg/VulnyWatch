@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login — VulnyWatch</title>
+  <title>Resend Verification — VulnyWatch</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -53,7 +53,6 @@
   </style>
 </head>
 <body>
-
 <nav>
   <a class="logo" href="/">
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,31 +64,22 @@
     VulnyWatch
   </a>
 </nav>
-
 <div class="container">
   <div class="card">
-    <h2>Welcome back</h2>
-    <p>Log in to your VulnyWatch account</p>
-
+    <h2>Resend Verification</h2>
+    <p>Enter your email and we'll send you a new verification link</p>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
         <div class="flash {{ category }}">{{ message }}</div>
       {% endfor %}
     {% endwith %}
-
-    <form method="POST" action="/login">
+    <form method="POST" action="/resend-verification">
       <label>Email</label>
       <input type="email" name="email" placeholder="you@example.com" required/>
-      <label>Password</label>
-      <input type="password" name="password" placeholder="••••••••" required/>
-      <button type="submit">Login</button>
+      <button type="submit">Resend Verification Email</button>
     </form>
     <div class="footer-link">
-      Don't have an account? <a href="/register">Register here</a>
-    </div>
-    <div class="footer-link" style="margin-top:10px;">
-      <a href="/forgot-password">Forgot password?</a> &nbsp;|&nbsp;
-      <a href="/resend-verification">Resend verification email</a>
+      Remember your password? <a href="/login">Login here</a>
     </div>
   </div>
 </div>
