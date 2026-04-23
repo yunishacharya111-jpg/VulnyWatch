@@ -81,6 +81,12 @@
       <label>Email</label>
       <input type="email" name="email" placeholder="you@example.com" required/>
       <label>Password</label>
+<div style="position: relative;">
+  <input type="password" name="password" id="password" placeholder="••••••••" required style="padding-right: 45px;"/>
+  <span onclick="togglePassword('password')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #58a6ff; font-size: 0.9rem;">
+    👁️
+  </span>
+</div>
       <input type="password" name="password" placeholder="••••••••" required/>
       <button type="submit">Login</button>
     </form>
@@ -93,5 +99,18 @@
     </div>
   </div>
 </div>
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = event.target;
+    if (field.type === "password") {
+        field.type = "text";
+        icon.textContent = "🙈";
+    } else {
+        field.type = "password";
+        icon.textContent = "👁️";
+    }
+}
+</script>
 </body>
 </html>
