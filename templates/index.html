@@ -22,29 +22,86 @@
     .nav-links a.btn {
       background: #238636; padding: 8px 18px; border-radius: 6px; color: #fff;
     }
-    .hero { text-align: center; padding: 100px 20px 60px; }
-    .hero h1 { font-size: 3rem; color: #58a6ff; margin-bottom: 16px; }
-    .hero p  { font-size: 1.2rem; color: #8b949e; max-width: 600px; margin: 0 auto 40px; }
+    .nav-links a:hover { color: #58a6ff; }
+    
+    /* Hero Section with Image */
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 60px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: 40px;
+    }
+    .hero-content { flex: 1; min-width: 280px; }
+    .hero-content h1 { 
+      font-size: 3rem; 
+      color: #58a6ff; 
+      margin-bottom: 16px; 
+      background: linear-gradient(135deg, #58a6ff, #3fb950);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-content p { 
+      font-size: 1.2rem; 
+      color: #8b949e; 
+      margin-bottom: 30px; 
+      line-height: 1.6;
+    }
     .hero-btns a {
       display: inline-block; padding: 14px 32px; border-radius: 8px;
-      text-decoration: none; font-size: 1rem; font-weight: 600; margin: 0 8px;
+      text-decoration: none; font-size: 1rem; font-weight: 600; margin-right: 12px;
     }
     .btn-primary   { background: #238636; color: #fff; }
+    .btn-primary:hover { background: #2ea043; }
     .btn-secondary { background: #21262d; color: #58a6ff; border: 1px solid #30363d; }
+    .btn-secondary:hover { background: #30363d; }
+    
+    .hero-image { flex: 1; min-width: 280px; text-align: center; }
+    .hero-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    
+    /* Features Section */
     .features {
       display: flex; justify-content: center; gap: 24px;
       flex-wrap: wrap; padding: 60px 40px;
+      background: #0d1117;
     }
     .card {
       background: #161b22; border: 1px solid #30363d; border-radius: 10px;
       padding: 28px; width: 260px; text-align: center;
+      transition: transform 0.3s, border-color 0.3s;
     }
+    .card:hover { transform: translateY(-5px); border-color: #58a6ff; }
     .card .icon { font-size: 2.2rem; margin-bottom: 12px; }
     .card h3   { color: #58a6ff; margin-bottom: 8px; }
     .card p    { color: #8b949e; font-size: 0.9rem; line-height: 1.5; }
+    
+    /* Footer */
     footer {
-      text-align: center; padding: 40px 20px 30px; border-top: 1px solid #30363d;
+      text-align: center; padding: 40px 20px 30px; 
+      border-top: 1px solid #30363d; background: #161b22;
     }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      color: #8b949e;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .footer-links a:hover { color: #58a6ff; }
     .footer-logo {
       display: flex; align-items: center; justify-content: center;
       gap: 10px; margin-bottom: 10px;
@@ -52,6 +109,43 @@
     .footer-logo svg  { width: 28px; height: 28px; }
     .footer-logo span { font-size: 1.2rem; font-weight: 700; color: #58a6ff; }
     footer p { color: #8b949e; font-size: 0.82rem; }
+    
+    /* Page Container for About/Contact */
+    .page-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+    .page-container h1 {
+      font-size: 2rem;
+      color: #58a6ff;
+      margin-bottom: 20px;
+    }
+    .page-container h2 {
+      font-size: 1.3rem;
+      color: #e6edf3;
+      margin: 25px 0 15px 0;
+    }
+    .page-container p {
+      color: #8b949e;
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+    .contact-info {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: 30px;
+    }
+    .contact-info p {
+      margin-bottom: 10px;
+    }
+    .contact-info a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+    .contact-info a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -67,17 +161,26 @@
     VulnyWatch
   </a>
   <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
     <a href="/login">Login</a>
     <a href="/register" class="btn">Get Started</a>
   </div>
 </nav>
 
+<!-- Hero Section with Image -->
 <div class="hero">
-  <h1>Scan. Detect. Secure.</h1>
-  <p>VulnyWatch scans any website for security vulnerabilities based on the OWASP Top 10 — in seconds.</p>
-  <div class="hero-btns">
-    <a href="/register" class="btn-primary">Start Scanning Free</a>
-    <a href="/login"    class="btn-secondary">Login</a>
+  <div class="hero-content">
+    <h1>Scan. Detect. Secure.</h1>
+    <p>VulnyWatch scans any website for security vulnerabilities based on the OWASP Top 10 — in seconds. Protect your web assets with our advanced scanning technology.</p>
+    <div class="hero-btns">
+      <a href="/register" class="btn-primary">Start Scanning Free</a>
+      <a href="/login" class="btn-secondary">Login</a>
+    </div>
+  </div>
+  <div class="hero-image">
+    <img src="https://via.placeholder.com/500x400/161b22/58a6ff?text=Cybersecurity+Scanner" alt="VulnyWatch Scanner"/>
   </div>
 </div>
 
@@ -105,6 +208,12 @@
 </div>
 
 <footer>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/about">About Us</a>
+    <a href="/contact">Contact</a>
+    <a href="/privacy">Privacy Policy</a>
+  </div>
   <div class="footer-logo">
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M32 4L8 14V32C8 45.3 18.7 57.4 32 60C45.3 57.4 56 45.3 56 32V14L32 4Z"
