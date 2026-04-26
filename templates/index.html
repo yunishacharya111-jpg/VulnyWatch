@@ -24,7 +24,7 @@
     }
     .nav-links a:hover { color: #58a6ff; }
     
-    /* Hero Section with Image */
+    /* Hero Section with Animation */
     .hero {
       display: flex;
       align-items: center;
@@ -61,11 +61,10 @@
     .btn-secondary:hover { background: #30363d; }
     
     .hero-image { flex: 1; min-width: 280px; text-align: center; }
-    .hero-image img {
+    .hero-image svg {
       max-width: 100%;
       height: auto;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      filter: drop-shadow(0 8px 32px rgba(0,0,0,0.3));
     }
     
     /* Features Section */
@@ -109,43 +108,6 @@
     .footer-logo svg  { width: 28px; height: 28px; }
     .footer-logo span { font-size: 1.2rem; font-weight: 700; color: #58a6ff; }
     footer p { color: #8b949e; font-size: 0.82rem; }
-    
-    /* Page Container for About/Contact */
-    .page-container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 60px 40px;
-    }
-    .page-container h1 {
-      font-size: 2rem;
-      color: #58a6ff;
-      margin-bottom: 20px;
-    }
-    .page-container h2 {
-      font-size: 1.3rem;
-      color: #e6edf3;
-      margin: 25px 0 15px 0;
-    }
-    .page-container p {
-      color: #8b949e;
-      line-height: 1.7;
-      margin-bottom: 15px;
-    }
-    .contact-info {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 12px;
-      padding: 30px;
-      margin-top: 30px;
-    }
-    .contact-info p {
-      margin-bottom: 10px;
-    }
-    .contact-info a {
-      color: #58a6ff;
-      text-decoration: none;
-    }
-    .contact-info a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -169,7 +131,7 @@
   </div>
 </nav>
 
-<!-- Hero Section with Image -->
+<!-- Hero Section with Animated Scanner Graphic -->
 <div class="hero">
   <div class="hero-content">
     <h1>Scan. Detect. Secure.</h1>
@@ -180,7 +142,54 @@
     </div>
   </div>
   <div class="hero-image">
-    <img src="https://via.placeholder.com/500x400/161b22/58a6ff?text=Cybersecurity+Scanner" alt="VulnyWatch Scanner"/>
+    <svg viewBox="0 0 450 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background -->
+      <rect width="450" height="350" rx="20" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+      
+      <!-- Animated Scanner Line -->
+      <line x1="50" y1="175" x2="400" y2="175" stroke="#58a6ff" stroke-width="2" stroke-dasharray="8 8">
+        <animate attributeName="x1" values="50;400;50" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="x2" values="400;50;400" dur="3s" repeatCount="indefinite"/>
+      </line>
+      
+      <!-- Scanning Radar Arc -->
+      <path d="M225 175 L225 85 A90 90 0 0 1 315 175" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+      </path>
+      
+      <!-- Shield Icon -->
+      <path d="M225 70 L130 110 L130 180 C130 240 175 270 225 285 C275 270 320 240 320 180 L320 110 L225 70Z" 
+            stroke="#58a6ff" stroke-width="3" fill="rgba(88,166,255,0.05)"/>
+      
+      <!-- Shield Checkmark -->
+      <path d="M190 185 L215 210 L260 160" stroke="#3fb950" stroke-width="4" stroke-linecap="round" fill="none"/>
+      
+      <!-- Lock inside shield -->
+      <rect x="210" y="195" width="30" height="22" rx="4" fill="#238636"/>
+      <path d="M220 195 L220 185 C220 178 230 178 230 185 L230 195" stroke="#238636" stroke-width="3" fill="none"/>
+      
+      <!-- Small virus dots (being detected) -->
+      <circle cx="140" cy="140" r="6" fill="#f85149" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="310" cy="170" r="5" fill="#e3b341" opacity="0.7">
+        <animate attributeName="opacity" values="0.2;0.7;0.2" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="160" cy="250" r="4" fill="#f85149" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;0.1;0.5" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      
+      <!-- Hexagon grid pattern -->
+      <polygon points="280,120 295,128 295,145 280,153 265,145 265,128" stroke="#30363d" stroke-width="1" fill="none"/>
+      <polygon points="340,210 355,218 355,235 340,243 325,235 325,218" stroke="#30363d" stroke-width="1" fill="none"/>
+      <polygon points="100,210 115,218 115,235 100,243 85,235 85,218" stroke="#30363d" stroke-width="1" fill="none"/>
+      
+      <!-- Bottom text -->
+      <text x="225" y="325" text-anchor="middle" fill="#8b949e" font-size="14" font-family="monospace">
+        Vulnerability Scanner Active
+        <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+      </text>
+    </svg>
   </div>
 </div>
 
@@ -210,9 +219,8 @@
 <footer>
   <div class="footer-links">
     <a href="/">Home</a>
-    <a href="/about">About Us</a>
+    <a href="/about">About</a>
     <a href="/contact">Contact</a>
-    <a href="/privacy">Privacy Policy</a>
   </div>
   <div class="footer-logo">
     <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
