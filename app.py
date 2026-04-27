@@ -9,7 +9,13 @@ from database import db, User, Scan, Result
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'vulnywatch-secret-key-2026')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:////tmp/vulnywatch.db')
+# Use PostgreSQL if available, otherwise fallback to SQLite
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith('postgres'):
+    # Fix for Render's PostgreSQL URLs
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace('postgres://', 'postgresql://')
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/vulnywatch.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
