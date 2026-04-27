@@ -1,6 +1,7 @@
 import os
+import io
 import threading
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, make_response
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sendgrid import SendGridAPIClient
@@ -11,7 +12,6 @@ from database import db, User, Scan, Result
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'vulnywatch-secret-key-2026')
 
-# Database configuration - PostgreSQL or SQLite fallback
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL and DATABASE_URL.startswith('postgres'):
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace('postgres://', 'postgresql://')
@@ -149,29 +149,24 @@ def dashboard():
 @login_required
 def scan():
     from scanner import run_scan
-    
+
     url = request.form['url'].strip()
     if not url.startswith('http'):
         url = 'https://' + url
-    
-    # Create scan record with Pending status
+
     new_scan = Scan(user_id=current_user.id, url=url, score=0, risk_label='Pending')
     db.session.add(new_scan)
     db.session.commit()
-    
-    # Run scan in background thread
+
     def run_scan_background(scan_id, target_url):
         with app.app_context():
             scan = db.session.get(Scan, scan_id)
             try:
                 scan.risk_label = 'Connectivity'
                 db.session.commit()
-                
                 scan_results, score, label = run_scan(target_url)
-                
                 scan.risk_label = 'Reporting'
                 db.session.commit()
-                
                 scan.score = score
                 scan.risk_label = label
                 for r in scan_results:
@@ -185,17 +180,13 @@ def scan():
                         fix=r['fix']
                     ))
                 db.session.commit()
-                
             except Exception as e:
                 print(f"[SCAN ERROR] {e}")
                 scan.risk_label = 'Error'
                 db.session.commit()
-    
-    # Start background thread
+
     thread = threading.Thread(target=run_scan_background, args=(new_scan.id, url))
     thread.start()
-    
-    # Redirect to progress page
     return redirect(url_for('scan_progress', scan_id=new_scan.id))
 
 @app.route('/scan-progress')
@@ -220,49 +211,30 @@ def scan_status(scan_id):
     scan = db.session.get(Scan, scan_id)
     if scan is None or scan.user_id != current_user.id:
         return {'status': 'error', 'message': 'Unauthorized'}
-    
-    # Progress mapping
+
     progress_map = {
-        'Pending': (5, 0, 'Initializing scanner...'),
+        'Pending':      (5,  0, 'Initializing scanner...'),
         'Connectivity': (15, 1, 'Checking website connectivity...'),
-        'SSL': (30, 2, 'Analyzing SSL/TLS security...'),
-        'Headers': (50, 3, 'Checking security headers...'),
-        'Injection': (65, 4, 'Testing for injection vulnerabilities...'),
-        'AccessControl': (80, 5, 'Checking access control issues...'),
-        'Reporting': (90, 6, 'Generating security report...'),
+        'SSL':          (30, 2, 'Analyzing SSL/TLS security...'),
+        'Headers':      (50, 3, 'Checking security headers...'),
+        'Injection':    (65, 4, 'Testing for injection vulnerabilities...'),
+        'AccessControl':(80, 5, 'Checking access control issues...'),
+        'Reporting':    (90, 6, 'Generating security report...'),
     }
-    
+
     risk_label = scan.risk_label
-    
     if risk_label in progress_map:
         percent, step, text = progress_map[risk_label]
-        return {
-            'status': 'scanning',
-            'progress_percent': percent,
-            'step_index': step,
-            'current_step': text
-        }
+        return {'status': 'scanning', 'progress_percent': percent,
+                'step_index': step, 'current_step': text}
     elif risk_label in ['SECURE', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']:
-        return {
-            'status': 'completed',
-            'progress_percent': 100,
-            'step_index': 6,
-            'current_step': 'Scan complete!'
-        }
+        return {'status': 'completed', 'progress_percent': 100,
+                'step_index': 6, 'current_step': 'Scan complete!'}
     elif risk_label == 'Error':
-        return {
-            'status': 'error',
-            'progress_percent': 0,
-            'step_index': 0,
-            'current_step': 'Scan failed'
-        }
-    
-    return {
-        'status': 'scanning',
-        'progress_percent': 10,
-        'step_index': 0,
-        'current_step': 'Starting scan...'
-    }
+        return {'status': 'error', 'progress_percent': 0,
+                'step_index': 0, 'current_step': 'Scan failed'}
+    return {'status': 'scanning', 'progress_percent': 10,
+            'step_index': 0, 'current_step': 'Starting scan...'}
 
 @app.route('/results/<int:scan_id>')
 @login_required
@@ -272,6 +244,70 @@ def results(scan_id):
         return redirect(url_for('dashboard'))
     scan_results = Result.query.filter_by(scan_id=scan_id).all()
     return render_template('results.html', scan=scan, results=scan_results)
+
+@app.route('/results/<int:scan_id>/pdf')
+@login_required
+def download_pdf(scan_id):
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+    scan = db.session.get(Scan, scan_id)
+    if scan is None or scan.user_id != current_user.id:
+        return redirect(url_for('dashboard'))
+
+    scan_results = Result.query.filter_by(scan_id=scan_id).all()
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                            rightMargin=40, leftMargin=40,
+                            topMargin=40, bottomMargin=40)
+
+    styles = getSampleStyleSheet()
+    story = []
+
+    title_style = ParagraphStyle('title', fontSize=22, fontName='Helvetica-Bold',
+                                  textColor=colors.HexColor('#1f6feb'), spaceAfter=6)
+    sub_style = ParagraphStyle('sub', fontSize=11, fontName='Helvetica',
+                                textColor=colors.HexColor('#555555'), spaceAfter=4)
+
+    story.append(Paragraph("VulnyWatch Security Report", title_style))
+    story.append(Paragraph(f"Target: {scan.url}", sub_style))
+    story.append(Paragraph(f"Scanned: {scan.timestamp.strftime('%B %d, %Y at %I:%M %p')}", sub_style))
+    story.append(Paragraph(f"Security Score: {scan.score}/100  |  Risk Level: {scan.risk_label}", sub_style))
+    story.append(Spacer(1, 16))
+
+    data = [['Check', 'Status', 'Severity', 'OWASP', 'Detail']]
+    for r in scan_results:
+        data.append([
+            Paragraph(r.check_name, styles['Normal']),
+            r.status,
+            r.severity,
+            r.owasp,
+            Paragraph(r.detail[:120] + ('...' if len(r.detail) > 120 else ''), styles['Normal'])
+        ])
+
+    table = Table(data, colWidths=[110, 50, 60, 45, 225])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f6feb')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#f6f8fa'), colors.white]),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#d0d7de')),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('PADDING', (0, 0), (-1, -1), 6),
+    ]))
+    story.append(table)
+    doc.build(story)
+    buffer.seek(0)
+
+    response = make_response(buffer.read())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=vulnywatch-report-{scan_id}.pdf'
+    return response
 
 @app.route('/resend-verification', methods=['GET', 'POST'])
 def resend_verification():
@@ -333,7 +369,6 @@ def delete_scan(scan_id):
     scan = db.session.get(Scan, scan_id)
     if scan is None or scan.user_id != current_user.id:
         return 'Unauthorized', 403
-    
     Result.query.filter_by(scan_id=scan_id).delete()
     db.session.delete(scan)
     db.session.commit()

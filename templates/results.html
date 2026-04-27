@@ -65,6 +65,7 @@
     td {
       padding: 12px 16px; font-size: 0.88rem;
       border-bottom: 1px solid #21262d; vertical-align: top;
+      word-break: break-word; white-space: normal;
     }
     tr:last-child td { border-bottom: none; }
     .status-pass { color: #3fb950; font-weight: 600; }
@@ -76,31 +77,24 @@
     .sev-medium   { color: #e3b341; }
     .sev-low      { color: #58a6ff; }
     .sev-info     { color: #8b949e; }
-    .fix { font-size: 0.82rem; color: #8b949e; margin-top: 4px; }
+    .fix {
+      font-size: 0.82rem; color: #8b949e; margin-top: 6px;
+      padding-top: 6px; border-top: 1px dashed #30363d; word-break: break-word;
+    }
     .back { display: inline-block; margin-bottom: 20px; color: #58a6ff; text-decoration: none; font-size: 0.9rem; }
-      /* Responsive table container */
+    /* Responsive table container */
     .table-wrapper {
       overflow-x: auto;
       border-radius: 12px;
       border: 1px solid #30363d;
       margin-bottom: 20px;
     }
-
-    /* Better text wrapping */
-    td {
-      word-break: break-word;
-      white-space: normal;
+    .download-btn {
+      display: inline-block; margin-top: 14px; padding: 8px 20px;
+      background: #238636; color: #fff; border-radius: 6px;
+      text-decoration: none; font-size: 0.88rem; font-weight: 600;
     }
-
-    /* Make fix text more readable */
-    .fix {
-      font-size: 0.82rem;
-      color: #8b949e;
-      margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px dashed #30363d;
-      word-break: break-word;
-    }
+    .download-btn:hover { background: #2ea043; }
   </style>
 </head>
 <body>
@@ -126,13 +120,16 @@
       <h1>{{ scan.url }}</h1>
       <p>Scanned on {{ scan.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</p>
       <span class="badge {{ scan.risk_label }}">{{ scan.risk_label }}</span>
+      <br>
+      <a class="download-btn" href="/results/{{ scan.id }}/pdf">⬇ Download PDF</a>
     </div>
     <div class="score-circle">
       <div class="num">{{ scan.score }}</div>
       <div class="label">/ 100</div>
     </div>
   </div>
-   {% if results %}
+
+  {% if results %}
   <div class="table-wrapper">
     <table>
       <thead>
