@@ -41,7 +41,6 @@
       word-break: break-all;
       font-size: 0.9rem;
     }
-    /* Progress Bar */
     .progress-bar-container {
       background: #0d1117;
       border-radius: 10px;
@@ -57,7 +56,6 @@
       border-radius: 10px;
       transition: width 0.3s ease;
     }
-    /* Scanning Steps */
     .steps {
       text-align: left;
       margin: 25px 0;
@@ -102,7 +100,6 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    /* Fun Fact Box */
     .fact-box {
       background: #0d1117;
       border-left: 4px solid #58a6ff;
@@ -168,7 +165,6 @@
       </div>
     </div>
 
-    <!-- Fun Fact Box -->
     <div class="fact-box" id="factBox">
       <div class="fact-icon">🔒</div>
       <div class="fact-title">Did You Know?</div>
@@ -190,7 +186,6 @@ let factInterval = null;
 
 // ============================================
 // VERIFIED SECURITY FACTS - 11 Facts
-// All facts have been verified for accuracy
 // ============================================
 const securityFacts = [
     { fact: "The first recorded cyberattack happened in 1834! Attackers stole financial market information by hacking the French Telegraph System.", source: "Interesting Engineering" },
@@ -207,32 +202,27 @@ const securityFacts = [
 ];
 
 function rotateFact() {
-    // Pick a random fact from the verified list
     const randomIndex = Math.floor(Math.random() * securityFacts.length);
     const fact = securityFacts[randomIndex];
     document.getElementById('factText').innerHTML = fact.fact;
     document.getElementById('factSource').innerHTML = `📚 Source: ${fact.source}`;
 }
 
-// Change fact every 8 seconds
 function startFactRotation() {
     rotateFact();
     factInterval = setInterval(rotateFact, 8000);
 }
 
-// Get scan ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 scanId = urlParams.get('scan_id');
 
 if (scanId) {
-    // Get the URL being scanned
     fetch(`/get-scan-url/${scanId}`)
         .then(response => response.json())
         .then(data => {
             document.getElementById('scanUrl').innerHTML = `Target: <strong style="color:#58a6ff;">${data.url}</strong>`;
         });
     
-    // Start checking scan status
     checkInterval = setInterval(checkScanStatus, 2000);
     startFactRotation();
 } else {
@@ -243,17 +233,11 @@ function checkScanStatus() {
     fetch(`/scan-status/${scanId}`)
         .then(response => response.json())
         .then(data => {
-            // Update progress bar
             const percent = data.progress_percent;
             document.getElementById('progressBar').style.width = percent + '%';
-            
-            // Update status text
             document.getElementById('statusText').innerHTML = data.current_step;
-            
-            // Update steps based on progress
             updateSteps(data.step_index);
             
-            // If scan is complete, redirect to results
             if (data.status === 'completed') {
                 clearInterval(checkInterval);
                 clearInterval(factInterval);
@@ -264,7 +248,6 @@ function checkScanStatus() {
                 }, 1500);
             }
             
-            // If scan failed
             if (data.status === 'error') {
                 clearInterval(checkInterval);
                 clearInterval(factInterval);

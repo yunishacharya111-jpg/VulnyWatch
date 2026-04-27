@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+import threading
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sendgrid import SendGridAPIClient
@@ -9,13 +10,14 @@ from database import db, User, Scan, Result
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'vulnywatch-secret-key-2026')
-# Use PostgreSQL if available, otherwise fallback to SQLite
+
+# Database configuration - PostgreSQL or SQLite fallback
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL and DATABASE_URL.startswith('postgres'):
-    # Fix for Render's PostgreSQL URLs
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace('postgres://', 'postgresql://')
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/vulnywatch.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
@@ -119,12 +121,13 @@ def login():
     if request.method == 'POST':
         email    = request.form['email']
         password = request.form['password']
+        remember = request.form.get('remember')
         user     = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
             if not user.email_verified:
                 flash('Please verify your email before logging in. Check your inbox.', 'error')
                 return redirect(url_for('login'))
-            login_user(user)
+            login_user(user, remember=remember == 'on')
             return redirect(url_for('dashboard'))
         else:
             flash('Invalid email or password.', 'error')
@@ -146,32 +149,120 @@ def dashboard():
 @login_required
 def scan():
     from scanner import run_scan
+    
     url = request.form['url'].strip()
     if not url.startswith('http'):
         url = 'https://' + url
+    
+    # Create scan record with Pending status
     new_scan = Scan(user_id=current_user.id, url=url, score=0, risk_label='Pending')
     db.session.add(new_scan)
     db.session.commit()
-    try:
-        scan_results, score, label = run_scan(url)
-        new_scan.score      = score
-        new_scan.risk_label = label
-        for r in scan_results:
-            db.session.add(Result(
-                scan_id    = new_scan.id,
-                check_name = r['check_name'],
-                status     = r['status'],
-                severity   = r['severity'],
-                detail     = r['detail'],
-                owasp      = r['owasp'],
-                fix        = r['fix']
-            ))
-        db.session.commit()
-    except Exception as e:
-        print(f"[SCAN ERROR] {e}")
-        new_scan.risk_label = 'Error'
-        db.session.commit()
-    return redirect(url_for('results', scan_id=new_scan.id))
+    
+    # Run scan in background thread
+    def run_scan_background(scan_id, target_url):
+        with app.app_context():
+            scan = db.session.get(Scan, scan_id)
+            try:
+                scan.risk_label = 'Connectivity'
+                db.session.commit()
+                
+                scan_results, score, label = run_scan(target_url)
+                
+                scan.risk_label = 'Reporting'
+                db.session.commit()
+                
+                scan.score = score
+                scan.risk_label = label
+                for r in scan_results:
+                    db.session.add(Result(
+                        scan_id=scan_id,
+                        check_name=r['check_name'],
+                        status=r['status'],
+                        severity=r['severity'],
+                        detail=r['detail'],
+                        owasp=r['owasp'],
+                        fix=r['fix']
+                    ))
+                db.session.commit()
+                
+            except Exception as e:
+                print(f"[SCAN ERROR] {e}")
+                scan.risk_label = 'Error'
+                db.session.commit()
+    
+    # Start background thread
+    thread = threading.Thread(target=run_scan_background, args=(new_scan.id, url))
+    thread.start()
+    
+    # Redirect to progress page
+    return redirect(url_for('scan_progress', scan_id=new_scan.id))
+
+@app.route('/scan-progress')
+@login_required
+def scan_progress():
+    scan_id = request.args.get('scan_id')
+    if not scan_id:
+        return redirect(url_for('dashboard'))
+    return render_template('scan_progress.html', scan_id=scan_id)
+
+@app.route('/get-scan-url/<int:scan_id>')
+@login_required
+def get_scan_url(scan_id):
+    scan = db.session.get(Scan, scan_id)
+    if scan and scan.user_id == current_user.id:
+        return {'url': scan.url}
+    return {'url': 'Unknown'}
+
+@app.route('/scan-status/<int:scan_id>')
+@login_required
+def scan_status(scan_id):
+    scan = db.session.get(Scan, scan_id)
+    if scan is None or scan.user_id != current_user.id:
+        return {'status': 'error', 'message': 'Unauthorized'}
+    
+    # Progress mapping
+    progress_map = {
+        'Pending': (5, 0, 'Initializing scanner...'),
+        'Connectivity': (15, 1, 'Checking website connectivity...'),
+        'SSL': (30, 2, 'Analyzing SSL/TLS security...'),
+        'Headers': (50, 3, 'Checking security headers...'),
+        'Injection': (65, 4, 'Testing for injection vulnerabilities...'),
+        'AccessControl': (80, 5, 'Checking access control issues...'),
+        'Reporting': (90, 6, 'Generating security report...'),
+    }
+    
+    risk_label = scan.risk_label
+    
+    if risk_label in progress_map:
+        percent, step, text = progress_map[risk_label]
+        return {
+            'status': 'scanning',
+            'progress_percent': percent,
+            'step_index': step,
+            'current_step': text
+        }
+    elif risk_label in ['SECURE', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']:
+        return {
+            'status': 'completed',
+            'progress_percent': 100,
+            'step_index': 6,
+            'current_step': 'Scan complete!'
+        }
+    elif risk_label == 'Error':
+        return {
+            'status': 'error',
+            'progress_percent': 0,
+            'step_index': 0,
+            'current_step': 'Scan failed'
+        }
+    
+    return {
+        'status': 'scanning',
+        'progress_percent': 10,
+        'step_index': 0,
+        'current_step': 'Starting scan...'
+    }
 
 @app.route('/results/<int:scan_id>')
 @login_required
@@ -235,6 +326,18 @@ def reset_password(token):
             flash('Password reset successfully! Please log in.', 'success')
             return redirect(url_for('login'))
     return render_template('reset_password.html')
+
+@app.route('/delete-scan/<int:scan_id>', methods=['POST'])
+@login_required
+def delete_scan(scan_id):
+    scan = db.session.get(Scan, scan_id)
+    if scan is None or scan.user_id != current_user.id:
+        return 'Unauthorized', 403
+    
+    Result.query.filter_by(scan_id=scan_id).delete()
+    db.session.delete(scan)
+    db.session.commit()
+    return 'OK', 200
 
 with app.app_context():
     db.create_all()
