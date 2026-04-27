@@ -8,7 +8,7 @@ from itsdangerous import URLSafeTimedSerializer
 from database import db, User, Scan, Result
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'vulnywatch-secret-key-2024')
+app.secret_key = os.environ.get('SECRET_KEY', 'vulnywatch-secret-key-2026')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:////tmp/vulnywatch.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
